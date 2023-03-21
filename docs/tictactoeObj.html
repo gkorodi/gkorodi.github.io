@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>TicTacToe - With Objects</title>
+
+    <style>
+        body {
+            align-content: center;
+            text-align: center;
+        }
+
+        .container {
+            border: 3px solid green;
+            padding: 10px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 6em 6em 6em;
+            grid-template-rows: 6em 6em 6em;
+
+            justify-content: center;
+        }
+
+        .grid-item {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Tic-Tac-Toe / But with Objects</h2>
+    <div class="container">
+        <div id="board"></div>
+        <div id="system-message"></div>
+    </div>
+
+    <script src="tictactoe.js"></script>
+
+
+    <script>
+
+        var board = new Board();
+        var game = new Game(board);
+
+        // Create board
+        [1, 2, 3].forEach(r => {
+            [1, 2, 3].forEach(c => {
+                var k = 'row' + r + 'col' + c;
+                var sq = document.getElementById(k);
+                // Check the status of the Game object with every click on a cell
+                sq.onclick = function (ev) { game.testGameStatus(this); };
+            });
+        });
+        board.message('Player `' + game.nextPlayer + '` start');
+
+
+    </script>
+</body>
+
+</html>
