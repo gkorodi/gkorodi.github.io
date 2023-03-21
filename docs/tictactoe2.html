@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>TicTacToe - Assignment 2 / Part II</title>
+
+    <style>
+        body {
+            align-content: center;
+            text-align: center;
+        }
+
+        .container {
+            margin: auto;
+            width: 50%;
+            border: 3px solid green;
+            padding: 10px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            background-color: #2196F3;
+            padding: 1px;
+        }
+
+        .grid-item {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            font-size: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Tic-Tac-Toe / Assignment 2 (Part 2)</h2>
+    <div class="container">
+        <div id="board"></div>
+        <div id="system-message"></div>
+    </div>
+
+
+    <script>
+        let rows = [1, 2, 3];
+        let cols = [1, 2, 3];
+        var isGameOver = false;
+
+        // Build the board, using CSS grid layout
+        let b = document.getElementById('board');
+        b.className = 'grid-container';
+        let content = '';
+        for (c = 1; c <= cols.length; c++) {
+            for (r = 1; r <= rows.length; r++) {
+                content += '<div id="row' + r + 'col' + c + '" class="grid-item"> </div>';
+            }
+        }
+        b.innerHTML = content;
+
+
+        let nextPlayer = Math.floor(Math.random() * 100) >= 50 ? 'X' : 'O';
+
+        function cellValue(r, c) {
+            var sq = document.getElementById('row' + r + 'col' + c);
+            return sq.innerText;
+        }
+
+        // Check all rows, then all columns, then the two diagonals
+        function checkBoard() {
+            // TODO: Could be more efficient, by terminating before checking the next section!
+            var board1 = Array.from(rows, r => Array.from(cols, c => cellValue(r, c)).join('')).join('|');
+            var board2 = Array.from(cols, c => Array.from(rows, r => cellValue(r, c)).join('')).join('|');
+            var diag1 = Array.from([1, 2, 3], x => cellValue(x, x)).join('');
+            var diag2 = Array.from([1, 2, 3], x => cellValue((4 - x), x)).join('');
+
+            var checkRows = (board1.indexOf('XXX') > -1 || board1.indexOf('OOO') > -1);
+            var checkCols = (board2.indexOf('XXX') > -1 || board2.indexOf('OOO') > -1);
+            var checkDiag1 = (diag1.indexOf('XXX') > -1 || diag1.indexOf('OOO') > -1);
+            var checkDiag2 = (diag2.indexOf('XXX') > -1 || diag2.indexOf('OOO') > -1);
+
+            if (checkRows || checkCols || checkDiag1 || checkDiag2) {
+                return true;
+            }
+            return false
+        }
+
+        function isStaleMate() {
+            var cells = [...document.getElementsByClassName('grid-item')].map(e => {
+                return e.innerHTML.trim();
+            }).join('');
+            return cells.length == 9;
+        }
+
+        function systemMessage(msg) {
+            let msgDiv = document.getElementById('system-message');
+            msgDiv.innerText = msg;
+        }
+
+        function systemAlert(msg) {
+            let msgDiv = document.getElementById('system-message');
+            msgDiv.innerHTML = '<span style="color: red; font-size: 2em">' + msg + '</span>';
+        }
+
+
+        function testGameStatus(clickedCell) {
+            if (isGameOver) {
+                alert("Please refresh the page, to start a new game.");
+                return;
+            }
+
+            if (clickedCell.innerText != '') {
+                alert('You cannot click on this cell. It was already clicked.');
+            } else {
+                clickedCell.innerText = nextPlayer;
+
+                if (isStaleMate()) {
+                    systemAlert('Nobody won. A Stale-Mate.');
+                    isGameOver = true;
+                    return;
+                }
+
+                if (checkBoard()) {
+                    systemAlert('GAME OVER! Player `' + nextPlayer + '` Won!');
+                    isGameOver = true;
+                } else {
+                    switchPlayer();
+                }
+            }
+        }
+
+        function switchPlayer() {
+            nextPlayer = nextPlayer == 'X' ? 'O' : 'X';
+            systemMessage('The next player is ' + nextPlayer);
+        }
+
+        // Create board
+        rows.forEach(r => {
+            cols.forEach(c => {
+                var k = 'row' + r + 'col' + c;
+                var sq = document.getElementById(k);
+                sq.onclick = function (ev) { testGameStatus(this); };
+            });
+        });
+        systemMessage('Player `' + nextPlayer + '` start');
+
+
+    </script>
+</body>
+
+</html>

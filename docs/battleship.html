@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Battleship</title>
+    <script type="text/javascript" src="battleship.js"></script>
+
+    <style>
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            height: 100vh;
+            background-color: #f1f1f1;
+        }
+
+        .wrapper {
+            display: grid;
+            grid-template-columns: auto auto auto auto auto auto;
+            grid-template-rows: auto auto auto auto auto auto;
+            grid-gap: 10px;
+            background-color: #fff;
+            color: #444;
+            width: inherit;
+            height: inherit;
+        }
+
+        .box {
+            background-color: #444;
+            color: #fff;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 style="padding: 20px">Battleship!
+        <span id="statusMsg">You have <span id="triesLeft"></span> tries left.</span>
+    </h1>
+
+    <div style="width: 400px; height: 400px" class="container">
+        <div id="gridContainer" class="wrapper">
+
+        </div>
+    </div><br />
+    <br />
+    <div style="display: block"><br />
+        Gray Square = A miss, there is no ship at that location;<br />
+        Red Square = A HIT, but the ship is still afloat;<br />
+        Orange Square = This ship has sunk<br />
+    </div>
+    <script>
+        var HIT_COLOR = 'red';
+        var MISS_COLOR = 'grey';
+        var SUNK_COLOR = 'orange';
+
+        var boardSize = 6;
+        var maxTries = 20;
+
+        var game = new GameBoard(boardSize, maxTries);
+
+        game.buildBoard();
+
+        //shipSizes = [2, 3, 3, 4];
+        game.arrangeShips({
+            "ships":
+                [
+                    { "name": "ship1", "orientation": "vertical", "size": 4, "coords": [0, 4] },
+                    { "name": "ship2", "orientation": "horizontal", "size": 3, "coords": [4, 3] },
+                    { "name": "ship3", "orientation": "horizontal", "size": 2, "coords": [1, 1] },
+                    { "name": "ship4", "orientation": "vertical", "size": 3, "coords": [3, 1] }
+                ]
+        });
+
+        // Once it is loaded. Set the sensor on each cell.
+        window.addEventListener('load', function () {
+            game.getBoardIdList().forEach(e => {
+                document.getElementById(e).onclick = game.checkState;
+            });
+        });
+
+    </script>
+</body>
+
+</html>
