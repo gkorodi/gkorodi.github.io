@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordleClone By Gabor</title>
+</head>
+
+<body>
+    <div class="gameboard">
+
+    </div>
+    <script>
+        function checkWord(word) {
+            const options = {
+                method: 'GET',
+                headers: {
+                    'X-RapidAPI-Key': 'dZbFnOcvTTMn94ixrjHad07GwEn8D3Xi',
+                    'X-RapidAPI-Host': 'wordle-creator-tools.p.rapidapi.com'
+                }
+            };
+
+            fetch('https://wordle-creator-tools.p.rapidapi.com/check-word?word=speak', options)
+                .then(response => response.json())
+                .then(response => console.log(response))
+                .catch(err => console.error(err));
+        }
+    </script>
+</body>
+
+</html>
