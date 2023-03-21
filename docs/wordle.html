@@ -29,62 +29,21 @@
 
         <div class="row">
             <div class="col-3"></div>
-            <div class="col-6">
+            <div class="col-6" id="grid_holder">
 
-                <table class="table">
-                    <thead>
+                <div class="container text-center" id="grid_holder">
 
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                        </tr>
-                        <tr>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                        </tr>
-                        <tr>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                        </tr>
-                        <tr>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                        </tr>
-                        <tr>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                        </tr>
-                        <tr>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                            <td>A</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <button class="btn btn-success" onclick="getTodayWord();">Today's Word</button>
+                </div>
 
             </div>
             <div class="col-3"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <button class="btn btn-success" onclick="getTodayWord();">Today's Word</button>
+                <button class="btn btn-danger" onclick="getARandomWord();">Get a Random Word</button>
+            </div>
         </div>
 
         <footer class="my-5 pt-5 text-muted text-center text-small">
@@ -108,7 +67,103 @@
 
     <script>
 
-        function getTodayWord() {
+        class WordleEngine {
+            status = '';
+            todaysWord = '';
+            currentWord = '';
+            attempts = 1;
+            posInWord = 1;
+
+            solved() {
+                console.log("Check if solved");
+                console.log("This todaysWord : " + this.todaysWord + " this current word: " + this.currentWord + " attempts:" + this.attempts);
+
+                if (this.todaysWord == this.currentWord) {
+                    this.status = 'solved';
+                } else {
+                    this.status = 'guessing';
+                }
+
+                return this.status == 'solved';
+            }
+
+            checkIfSolved() {
+                return false;
+            }
+
+            setSolution(todaysWord) {
+                this.todaysWord = todaysWord;
+            }
+
+            userHasWon() {
+                return (this.attempts <= 6 && this.status == 'solved');
+            }
+
+            userHasLost() {
+                return (this.attempts > 6 && !this.userHasWon());
+            }
+
+
+            analyzeKeyEvent(ke) {
+                if ((ke.keyCode >= 65 && ke.keyCode <= 90) || (ke.keyCode >= 97 && ke.keyCode <= 122)) {
+                    this.currentWord += ke.key;
+
+                    if (this.posInWord <= 5) {
+
+                        var cellKey = 'row' + this.attempts + 'col' + this.posInWord;
+                        document.getElementById(cellKey).innerHTML = ke.key;
+
+                        if (this.posInWord == 5) {
+                            this.solved();
+
+                            // Reset some of the internal states for another attempt
+                            this.attempts++;
+                            this.currentWord = '';
+                            this.posInWord = 1;
+
+                        } else {
+                            // Advance to the next letter
+                            this.posInWord++;
+                        }
+                    }
+
+                    if (this.attempts > 6) {
+                        this.status = 'over';
+                        alert("GAME OVER, you lost! LOOOOSER!");
+                    }
+
+                    console.log('Attempts:' + this.attempts + ' LetterPosition:' + this.posInWord + ' CurrentWord:' + this.currentWord + " Status:" + this.status);
+                }
+            }
+        }
+
+        const engine = new WordleEngine();
+
+
+        document.addEventListener('keyup', function (keyPressedEvent) {
+            if (engine.analyzeKeyEvent(keyPressedEvent) == engine.userHasWon()) {
+                alert("You WON!");
+            } else {
+                if (engine.userHasLost()) {
+                    alert("You LOST! LOOOOOOSER!");
+                }
+            }
+        });
+
+        function getARandomWord() {
+            console.log("Get a Random Word....");
+            const xhr = new XMLHttpRequest();
+            xhr.addEventListener("readystatechange", function () {
+                if (this.readyState === this.DONE) {
+                    console.log('Setting today`s word to ' + this.responseText);
+                    engine.setSolution(JSON.parse(this.responseText)[0]);
+                }
+            });
+            xhr.open("GET", "https://random-word-api.herokuapp.com/word?length=5");
+            xhr.send();
+        }
+
+        function getTodaysWord() {
             const data = null;
 
             const xhr = new XMLHttpRequest();
@@ -149,6 +204,36 @@
             xhr.setRequestHeader("X-RapidAPI-Host", "wordle-game-api1.p.rapidapi.com");
 
             xhr.send(data);
+        }
+
+        const arrayRange = (start, stop, step) =>
+            Array.from(
+                { length: (stop - start) / step + 1 },
+                (value, index) => start + index * step
+            );
+
+
+        function buildBoard() {
+            const rows = arrayRange(1, 6, 1);
+            const cols = arrayRange(1, 5, 1);
+
+            var content = '';
+            rows.forEach(r => {
+                content += '<div class="row"><div class="col-1"></div>';
+                cols.forEach(c => {
+                    var cellKey = 'row' + r + 'col' + c;
+                    content += '<div class="col-2 cell" id="' + cellKey + '">X</div>';
+                });
+                content += '<div class="col-1"></div></div>';
+            });
+            document.getElementById('grid_holder').innerHTML = content;
+        }
+
+        window.onload = function () {
+            console.log("Loading");
+            buildBoard();
+
+            getARandomWord();
         }
     </script>
 
