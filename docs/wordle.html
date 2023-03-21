@@ -1,33 +1,157 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WordleClone By Gabor</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Gabor Korodi <gak486@g.harvard.edu>">
+
+    <title>Wordle Clone</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/styles.css" rel="stylesheet">
+
 </head>
 
-<body>
-    <div class="gameboard">
+<body class="bg-light">
 
+    <div class="container">
+        <div class="py-5 text-center">
+            <img class="d-block mx-auto mb-4" src="W.svg" alt="" width="72" height="72">
+
+            <h2>Wordle Clone by Gabor</h2>
+            <p class="lead">A simple implementation of the word guessing game by <a
+                    href="https://en.wikipedia.org/wiki/Josh_Wardle?useskin=vector" target="_blank">Josh
+                    Wardle</a>.<br />
+                See the original <a href="">New York Times version.</a></p>
+        </div>
+
+        <div class="row">
+            <div class="col-3"></div>
+            <div class="col-6">
+
+                <table class="table">
+                    <thead>
+
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                        </tr>
+                        <tr>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                        </tr>
+                        <tr>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                        </tr>
+                        <tr>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                        </tr>
+                        <tr>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                        </tr>
+                        <tr>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                            <td>A</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <button class="btn btn-success" onclick="getTodayWord();">Today's Word</button>
+
+            </div>
+            <div class="col-3"></div>
+        </div>
+
+        <footer class="my-5 pt-5 text-muted text-center text-small">
+            <p class="mb-1">&copy; 2023 Gabor Korodi</p>
+            <ul class="list-inline">
+                <li class="list-inline-item"><a href="#">Privacy</a></li>
+                <li class="list-inline-item"><a href="#">Terms</a></li>
+            </ul>
+        </footer>
     </div>
-    <script>
-        function checkWord(word) {
-            const options = {
-                method: 'GET',
-                headers: {
-                    'X-RapidAPI-Key': 'dZbFnOcvTTMn94ixrjHad07GwEn8D3Xi',
-                    'X-RapidAPI-Host': 'wordle-creator-tools.p.rapidapi.com'
-                }
-            };
 
-            fetch('https://wordle-creator-tools.p.rapidapi.com/check-word?word=speak', options)
-                .then(response => response.json())
-                .then(response => console.log(response))
-                .catch(err => console.error(err));
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+
+        function getTodayWord() {
+            const data = null;
+
+            const xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+
+            xhr.addEventListener("readystatechange", function () {
+                if (this.readyState === this.DONE) {
+                    console.log(this.responseText);
+                }
+            });
+
+            xhr.open("GET", "https://wordle-game-api1.p.rapidapi.com/word");
+            xhr.setRequestHeader("X-RapidAPI-Key", "dZbFnOcvTTMn94ixrjHad07GwEn8D3Xi");
+            xhr.setRequestHeader("X-RapidAPI-Host", "wordle-game-api1.p.rapidapi.com");
+
+            xhr.send(data);
+        }
+
+        function checkWord(word) {
+            // Example from https://rapidapi.com/azizbergach/api/wordle-game-api1
+
+            const data = JSON.stringify({
+                "guess": word
+            });
+
+            const xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+
+            xhr.addEventListener("readystatechange", function () {
+                if (this.readyState === this.DONE) {
+                    console.log(this.responseText);
+                }
+            });
+
+            xhr.open("POST", "https://wordle-game-api1.p.rapidapi.com/guess");
+            xhr.setRequestHeader("content-type", "application/json");
+            xhr.setRequestHeader("X-RapidAPI-Key", "dZbFnOcvTTMn94ixrjHad07GwEn8D3Xi");
+            xhr.setRequestHeader("X-RapidAPI-Host", "wordle-game-api1.p.rapidapi.com");
+
+            xhr.send(data);
         }
     </script>
+
 </body>
 
 </html>
