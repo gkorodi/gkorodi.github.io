@@ -25,6 +25,26 @@
 
         }
 
+        #lettersused {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(3em, 1fr));
+            background-color: #fff;
+            color: #444;
+        }
+
+        .letter {
+            font-size: 1em;
+            justify-content: space-evenly;
+            flex-grow: 1;
+            padding: 1em;
+            text-align: center;
+
+            background-color: #cececc;
+            color: #fff;
+            border-radius: 5px;
+        }
+
         .box {
             font-size: 2em;
             justify-content: space-evenly;
@@ -34,6 +54,18 @@
             background-color: #cececc;
             color: #fff;
             border-radius: 5px;
+        }
+
+        .MISPLACED {
+            font-size: 2em;
+            background-color: yellow;
+            color: black;
+        }
+
+        .NOTINWORD {
+            font-size: 2em;
+            background-color: gray;
+            color: white;
         }
     </style>
 </head>
@@ -58,9 +90,22 @@
                 <div id="wrapper" class="wrapper">
 
                 </div>
+
             </div>
             <div class="col-1"> </div>
         </div>
+
+        <div class="row">
+
+            <div class="col-12 justify-content-center">
+                <hr />
+                <div id="lettersused">
+
+                </div>
+
+            </div>
+        </div>
+
 
         <footer class="my-5 pt-5 text-muted text-center text-small">
             <p class="mb-1">&copy; 2023 Gabor Korodi</p>
@@ -85,7 +130,41 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    The rules of the game are:
+                    <p>The player has 6 tries to guess a 5 letter word.</p>
+                    <p>Guesses must be valid 5 letter words. An alert will be
+                        generated, if the word is not a valid dictionary word.</p>
+                    <p>
+                        For each letter in the guess, you must report one of three results:
+                    <ul>
+                        <li>if the letter is not in the answer</li>
+                        <li>if the in the answer but in a different place than in your guess word</li>
+                        <li>if the letter is in the same place as in the guess word</li>
+                    </ul>
+                    </p>
+                    <br />
+                    <p>Here is an example response:<br />
+                        The target word is "PRIDE", and the guessed word is "DOPED".<br />
+                        the <span class="MISPLACED">D</span> is in the wrong place<br />
+                        the <span class="NOTINWORD">O</span> is not in the word<br />
+                        the <span class="MISPLACED">P</span> is in the wrong place<br />
+                        the <span class="MISPLACED">E</span> is in the wrong place<br />
+                        the second <span class="NOTINWORD">D</span> is in not in the word<br />
+                    </p>
+
+                    <p>The game ends when the user guesses the word or uses all 6 guesses.</p>
+
+                    <!--                     
+                    Required Features:
+                    *  Display a used letter list so that the user can avoid letters that are eliminated.
+                    *  Include an optional “debug” mode (switchable at the start of the game) that displays the
+                        answer so that it is easier to check correct operation.
+                    *  Allow the user to play multiple times.
+                    *  Responsive to tablet size (down to 600px)
+                    *  Track statistics of wins and losses- and how many guesses a win needed.
+                    *  Some animation when the user wins.
+                    *  Responsive to 600px wide
+                    -->
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -132,9 +211,7 @@
     <script type="text/javascript" src="wordle.js"></script>
     <script>
 
-
-
-        const board = new WordleBoard(document.getElementById('wrapper'));
+        const board = new WordleBoard(document.getElementById('wrapper'), document.getElementById('lettersused'));
         const engine = new WordleEngine(board);
 
         // Use the whole page to handle keystrokes
@@ -150,62 +227,35 @@
             if (uhv) { alert('You WON!'); }
         });
 
+        var letters = document.getElementsByClassName('letter');
+        [...letters].forEach(element => {
+            element.addEventListener('click', function (eventSource) {
+                console.log(this.innerText);
+
+                if (engine.status === 'guessing') {
+                    var fakeKeyEvent = { 'key': this.innerText, 'keyCode': this.innerText.charCodeAt(0) }
+                    engine.analyzeKeyEvent(fakeKeyEvent);
+                }
+
+                var uhv = engine.userHasWon();
+                var uhl = engine.userHasLost();
+                if (uhv) { alert('You WON!'); }
+            });
+        });
+
         function getARandomWord() {
             console.log("Get a Random Word....");
             const xhr = new XMLHttpRequest();
             xhr.addEventListener("readystatechange", function () {
                 if (this.readyState === this.DONE) {
-                    console.log('Setting today`s word to ' + this.responseText);
-                    engine.setSolution(JSON.parse(this.responseText)[0]);
+                    var tw = JSON.parse(this.responseText)[0].toUpperCase();
+                    console.log('Setting today`s word to ' + tw);
+                    engine.setSolution(tw);
                 }
             });
             xhr.open("GET", "https://random-word-api.herokuapp.com/word?length=5");
             xhr.send();
         }
-
-        function getTodaysWord() {
-            const data = null;
-
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
-
-            xhr.addEventListener("readystatechange", function () {
-                if (this.readyState === this.DONE) {
-                    console.log(this.responseText);
-                }
-            });
-
-            xhr.open("GET", "https://wordle-game-api1.p.rapidapi.com/word");
-            xhr.setRequestHeader("X-RapidAPI-Key", "dZbFnOcvTTMn94ixrjHad07GwEn8D3Xi");
-            xhr.setRequestHeader("X-RapidAPI-Host", "wordle-game-api1.p.rapidapi.com");
-
-            xhr.send(data);
-        }
-
-        function checkWord(word) {
-            // Example from https://rapidapi.com/azizbergach/api/wordle-game-api1
-
-            const data = JSON.stringify({
-                "guess": word
-            });
-
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
-
-            xhr.addEventListener("readystatechange", function () {
-                if (this.readyState === this.DONE) {
-                    console.log(this.responseText);
-                }
-            });
-
-            xhr.open("POST", "https://wordle-game-api1.p.rapidapi.com/guess");
-            xhr.setRequestHeader("content-type", "application/json");
-            xhr.setRequestHeader("X-RapidAPI-Key", "dZbFnOcvTTMn94ixrjHad07GwEn8D3Xi");
-            xhr.setRequestHeader("X-RapidAPI-Host", "wordle-game-api1.p.rapidapi.com");
-
-            xhr.send(data);
-        }
-
 
         window.onload = function () {
             console.log("Loading");

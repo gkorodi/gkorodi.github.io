@@ -10,6 +10,11 @@ const Colors = {
     Missing: '#727260'
 };
 
+// Reference: https://javascript.plainenglish.io/create-an-array-of-alphabet-characters-in-javascript-with-this-simple-trick-930033079dd3
+const alphabet = Array.from(Array(26)).map((e, i) => i + 65).map((x) => String.fromCharCode(x));
+console.log(alphabet);
+
+
 class Logger {
     static setDebugOn() {
         localStorage.isDebugOn = true;
@@ -23,8 +28,8 @@ class WordleBoard {
     rows = arrayRange(1, 6, 1);
     cols = arrayRange(1, 5, 1);
 
-    constructor(domElement) {
-        // Build the grid in the DOM, is what the WordleBoard class does.
+    constructor(domElement, alphabetsDomElement) {
+        // Build the main grid in the DOM, is what the WordleBoard class does.
         var content = '';
         this.rows.forEach(r => {
             this.cols.forEach(c => {
@@ -35,6 +40,13 @@ class WordleBoard {
 
         });
         domElement.innerHTML = content;
+
+        // Build the `letters used` grid
+        content = '';
+        alphabet.forEach(l => {
+            content += '<div id="letter' + l + '" class="letter never-used">' + l + '</div>';
+        })
+        alphabetsDomElement.innerHTML = content;
     }
 
     getCellByKey(cellKey) {
@@ -116,7 +128,7 @@ class WordleEngine {
 
     analyzeKeyEvent(ke) {
         if ((ke.keyCode >= 65 && ke.keyCode <= 90) || (ke.keyCode >= 97 && ke.keyCode <= 122)) {
-            this.currentWord += ke.key;
+            this.currentWord += ke.key.toUpperCase();
 
             if (this.posInWord <= 5) {
 
@@ -124,6 +136,10 @@ class WordleEngine {
                 document.getElementById(cellKey).innerHTML = ke.key;
 
                 if (this.posInWord == 5) {
+
+                    var isValid = Utilities.validateWithDictionary(this.currentWord);
+                    console.log("IsValid:" + isValid);
+
                     this.solved();
 
                     // Reset some of the internal states for another attempt
@@ -144,5 +160,48 @@ class WordleEngine {
 
             Logger.debug('Attempts:' + this.attempts + ' LetterPosition:' + this.posInWord + ' CurrentWord:' + this.currentWord + " Status:" + this.status);
         }
+    }
+}
+
+class Utilities {
+
+    // Using the Dictionary and Thesaurus APIs from the https://www.dictionaryapi.com/
+    // API keys have been obtained with a validated account (signed up for API access)
+
+    static validateWithThesaurus(gw) {
+        console.log("getDictionaryResponse.... for " + gw);
+        var dictionaryKey = '23ce0b18-bc31-4585-ba00-957b459f0ff0';
+
+        const xhr = new XMLHttpRequest();
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === this.DONE) {
+                console.log("Thesaurus Response");
+                console.log(this.responseText);
+                return 'VALID';
+            }
+        });
+
+        xhr.open("GET", 'https://www.dictionaryapi.com/api/v3/references/thesaurus/json/'
+            + gw
+            + '?key=9526c19e-5ec9-4f50-bc72-444bd653baf0');
+        xhr.send();
+    }
+
+    static validateWithDictionary(gw) {
+        // https://www.dictionaryapi.com/api/v3/references/collegiate/json/voluminous?key=your-api-key
+
+        const xhr = new XMLHttpRequest();
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === this.DONE) {
+                console.log("Dictionary Response");
+                console.log(this.responseText);
+                return 'VALID';
+            }
+        });
+
+        xhr.open("GET", 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/'
+            + gw
+            + '?key=23ce0b18-bc31-4585-ba00-957b459f0ff0');
+        xhr.send();
     }
 }
