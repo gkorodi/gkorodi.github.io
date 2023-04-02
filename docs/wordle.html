@@ -250,16 +250,33 @@
                 if (this.readyState === this.DONE) {
                     var tw = JSON.parse(this.responseText)[0].toUpperCase();
                     console.log('Setting today`s word to ' + tw);
-                    engine.setSolution(tw);
+                    return tw;
                 }
             });
             xhr.open("GET", "https://random-word-api.herokuapp.com/word?length=5");
             xhr.send();
         }
 
+        async function getARandomWord() {
+            console.log("getARandomWord start");
+
+            const response = await fetch("https://random-word-api.herokuapp.com/word?length=5");
+            const jsonData = await response.json();
+
+            console.log("getARandomWord return");
+
+            let solution = Utilities.isValidDictionaryWord(jsonData[0]);
+            console.log(solution);
+
+            return jsonData[0];
+        }
+
         window.onload = function () {
             console.log("Loading");
-            getARandomWord();
+
+            // Pick a random word, validate it agains the dictionaryAPI and use it as the solution in the current game.
+            var theSolution = getARandomWord();
+
         }
     </script>
 

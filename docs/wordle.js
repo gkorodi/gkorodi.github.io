@@ -114,6 +114,7 @@ class WordleEngine {
     }
 
     setSolution(todaysWord) {
+        console.log("The solution this time is " + todaysWord);
         this.todaysWord = todaysWord;
     }
 
@@ -189,13 +190,14 @@ class Utilities {
 
     static validateWithDictionary(gw) {
         // https://www.dictionaryapi.com/api/v3/references/collegiate/json/voluminous?key=your-api-key
+        console.log("Validating word:" + gw);
 
         const xhr = new XMLHttpRequest();
         xhr.addEventListener("readystatechange", function () {
             if (this.readyState === this.DONE) {
                 console.log("Dictionary Response");
                 console.log(this.responseText);
-                return 'VALID';
+                return false;
             }
         });
 
@@ -203,5 +205,23 @@ class Utilities {
             + gw
             + '?key=23ce0b18-bc31-4585-ba00-957b459f0ff0');
         xhr.send();
+    }
+
+    // Using a subscribed API from MiriamWebster dictionary to validate a word
+    static async isValidDictionaryWord(gw) {
+        console.log("Validating " + gw);
+        const response = await fetch('https://www.dictionaryapi.com/api/v3/references/collegiate/json/'
+            + gw
+            + '?key=23ce0b18-bc31-4585-ba00-957b459f0ff0');
+        const responseData = await response.json();
+
+        if ('meta' in responseData[0]) {
+            return true;
+        } else {
+            return false;
+        }
+        // console.log("Returning");
+        // console.log(jsonData[0]['meta']);
+        // return jsonData[0]['meta'];
     }
 }
