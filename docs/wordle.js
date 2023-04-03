@@ -53,15 +53,18 @@ class WordleBoard {
         return document.getElementById(cellKey);
     }
 
-    flipCells(resolution) {
-        Logger.debug("Resolution:");
-        Logger.debug(resolution);
+    flipLettter(letterIdx, resolved) {
+        document.getElementById('letter' + letterIdx).style.backgroundColor = resolved;
+        document.getElementById('letter' + letterIdx).style.color = '#fff';
+    }
 
+    flipCells(resolution) {
         // The first element is the attempt/row integer
         var rowId = resolution.shift();
         [1, 2, 3, 4, 5].forEach(c => {
             var cell = this.getCellByKey('row' + rowId + 'col' + c);
             cell.style.backgroundColor = resolution[c - 1];
+            this.flipLettter(cell.innerText.toUpperCase(), resolution[c - 1]);
         })
     }
 
@@ -94,10 +97,12 @@ class WordleEngine {
         return Colors.Missing;
     }
 
-    solved() {
-        Logger.debug("solved() todaysWord:" + this.todaysWord + " currentWord:" + this.currentWord + " attempts:" + this.attempts);
+    isSolved() {
+        console.log("solved() todaysWord:" + this.todaysWord + " currentWord:" + this.currentWord + " attempts:" + this.attempts);
 
         // Determine that the current row gets which color cells
+        console.log("CurrentWord: " + this.currentWord);
+
         var a = this.currentWord.split('').map((c, i, r) => this.checkCharacter(c, i));
         a.unshift(this.attempts);
         this.board.flipCells(a);
@@ -105,17 +110,14 @@ class WordleEngine {
         // Check status based on the colors
         const exactMatches = a.reduce((u, cv) => u += (cv === Colors.Exact) ? 1 : 0, 0);
         this.status = (exactMatches === 5) ? 'solved' : 'guessing';
+        console.log("isSolved: " + this.status);
 
         return this.status == 'solved';
     }
 
-    checkIfSolved() {
-        return false;
-    }
-
-    setSolution(todaysWord) {
-        console.log("The solution this time is " + todaysWord);
-        this.todaysWord = todaysWord;
+    setSolution(w) {
+        console.log("The solution this time is `" + w + "`");
+        this.todaysWord = w.toUpperCase();
     }
 
     userHasWon() {
@@ -129,22 +131,36 @@ class WordleEngine {
 
     analyzeKeyEvent(ke) {
         if ((ke.keyCode >= 65 && ke.keyCode <= 90) || (ke.keyCode >= 97 && ke.keyCode <= 122)) {
+
             this.currentWord += ke.key.toUpperCase();
-
             if (this.posInWord <= 5) {
-
                 var cellKey = 'row' + this.attempts + 'col' + this.posInWord;
-                document.getElementById(cellKey).innerHTML = ke.key;
+                document.getElementById(cellKey).innerHTML = ke.key.toUpperCase();
+                document.getElementById(cellKey).style.border = 'none';
 
                 if (this.posInWord == 5) {
+                    //var isValid = Utilities.validateWithDictionary(this.currentWord);
+                    //console.log("IsValid:" + isValid);
 
-                    var isValid = Utilities.validateWithDictionary(this.currentWord);
-                    console.log("IsValid:" + isValid);
+                    if (this.isSolved()) {
+                        console.log("Solved TRUE");
+                    } else {
+                        var currentGuess = this.currentWord;
+                        Utilities.isValidDictionaryWord(currentGuess).then((isValid) => {
+                            console.log("lllllll" + isValid);
+                            if (isValid) {
+                                // Reset some of the internal states for another attempt
+                                this.attempts++;
 
-                    this.solved();
-
-                    // Reset some of the internal states for another attempt
-                    this.attempts++;
+                            } else {
+                                // Do not advance, roll back the current word.
+                                this.currentWord = '';
+                                this.posInWord = 1;
+                                // Pop up a warning about invalid word
+                                alert("The word `" + currentGuess + "` is not a valid dictionary word.");
+                            }
+                        });
+                    }
                     this.currentWord = '';
                     this.posInWord = 1;
 
@@ -153,6 +169,9 @@ class WordleEngine {
                     this.posInWord++;
                 }
             }
+            document.getElementById('row' + this.attempts + 'col' + this.posInWord).style.border = '1 solid #000';
+
+
 
             if (this.attempts > 6) {
                 this.status = 'over';
@@ -190,17 +209,17 @@ class Utilities {
 
     static validateWithDictionary(gw) {
         // https://www.dictionaryapi.com/api/v3/references/collegiate/json/voluminous?key=your-api-key
-        console.log("Validating word:" + gw);
+        console.log("validateWithDictionary() " + gw);
 
         const xhr = new XMLHttpRequest();
         xhr.addEventListener("readystatechange", function () {
             if (this.readyState === this.DONE) {
-                console.log("Dictionary Response");
-                console.log(this.responseText);
+                var o = JSON.parse(this.responseText);
+                console.log("Done...");
+                console.log(o[0]['meta']['id']);
                 return false;
             }
         });
-
         xhr.open("GET", 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/'
             + gw
             + '?key=23ce0b18-bc31-4585-ba00-957b459f0ff0');
@@ -209,19 +228,11 @@ class Utilities {
 
     // Using a subscribed API from MiriamWebster dictionary to validate a word
     static async isValidDictionaryWord(gw) {
-        console.log("Validating " + gw);
+        console.log("isValidDictionaryWord() start " + gw);
         const response = await fetch('https://www.dictionaryapi.com/api/v3/references/collegiate/json/'
             + gw
             + '?key=23ce0b18-bc31-4585-ba00-957b459f0ff0');
         const responseData = await response.json();
-
-        if ('meta' in responseData[0]) {
-            return true;
-        } else {
-            return false;
-        }
-        // console.log("Returning");
-        // console.log(jsonData[0]['meta']);
-        // return jsonData[0]['meta'];
+        return responseData.filter(e => typeof (e) === 'object').length > 0;
     }
 }

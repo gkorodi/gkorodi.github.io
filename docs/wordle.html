@@ -34,14 +34,14 @@
         }
 
         .letter {
-            font-size: 1em;
+            /* font-size: 0.5em;
             justify-content: space-evenly;
-            flex-grow: 1;
-            padding: 1em;
+            flex-grow: 1; */
+            padding: 0.5em;
             text-align: center;
 
             background-color: #cececc;
-            color: #fff;
+            color: #000;
             border-radius: 5px;
         }
 
@@ -96,12 +96,16 @@
         </div>
 
         <div class="row">
+            <div class="col-4">
 
-            <div class="col-12 justify-content-center">
+            </div>
+            <div class="col-4 justify-content-center">
                 <hr />
                 <div id="lettersused">
 
                 </div>
+            </div>
+            <div class="col-4">
 
             </div>
         </div>
@@ -196,8 +200,6 @@
     </div>
 
 
-
-
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
@@ -263,20 +265,17 @@
             const response = await fetch("https://random-word-api.herokuapp.com/word?length=5");
             const jsonData = await response.json();
 
-            console.log("getARandomWord return");
-
-            let solution = Utilities.isValidDictionaryWord(jsonData[0]);
-            console.log(solution);
-
+            // console.log("getARandomWord return");
+            // let solution = Utilities.isValidDictionaryWord(jsonData[0]);
+            // console.log(solution);
             return jsonData[0];
         }
 
         window.onload = function () {
-            console.log("Loading");
-
             // Pick a random word, validate it agains the dictionaryAPI and use it as the solution in the current game.
-            var theSolution = getARandomWord();
-
+            var theSolution = getARandomWord()
+                .then((data) => Utilities.isValidDictionaryWord(data)
+                    .then(isValid => isValid ? engine.setSolution(data) : location.reload()));
         }
     </script>
 
