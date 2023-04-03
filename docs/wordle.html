@@ -51,21 +51,21 @@
             flex-grow: 1;
             text-align: center;
 
-            background-color: #cececc;
+            background-color: #ddd;
             color: #fff;
             border-radius: 5px;
         }
 
         .MISPLACED {
             font-size: 2em;
-            background-color: yellow;
+            background-color: rgb(226, 226, 99);
             color: black;
         }
 
         .NOTINWORD {
             font-size: 2em;
-            background-color: gray;
-            color: white;
+            background-color: rgb(129, 125, 125);
+            color: #fff;
         }
     </style>
 </head>
@@ -111,16 +111,14 @@
         </div>
 
 
-        <footer class="my-5 pt-5 text-muted text-center text-small">
+        <footer class="my-5 text-muted text-center text-small">
             <p class="mb-1">&copy; 2023 Gabor Korodi</p>
             <ul class="list-inline">
-                <li class="list-inline-item"><a href="https://www.paypal.com/donate/?hosted_button_id=GVE3583H89868"
-                        target="_blank">Donate</a></li>
-                <li class="list-inline-item"><a href="#">Copyright</a></li>
                 <li class="list-inline-item"><a href="#" data-bs-toggle="modal" data-bs-target="#rulesModal">Rules</a>
                 <li class="list-inline-item"><a href="#" data-bs-toggle="modal"
                         data-bs-target="#settingsModal">Settings</a>
                 </li>
+                <li class="list-inline-item"><a href="#" data-bs-toggle="modal" data-bs-target="#statsModal">Stats</a>
             </ul>
         </footer>
     </div>
@@ -188,8 +186,8 @@
                 <div class="modal-body">
                     Change settings:
                     <form>
-                        Debug: <input type="checkbox" name="debug" /><br />
-                        Static: <input type="checkbox" name="static" /><br />
+                        Debug: <input type="checkbox" name="debug"
+                            onchange="window.localStorage.setItem('isDebugOn', this.checked);" /><br />
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -198,6 +196,47 @@
             </div>
         </div>
     </div>
+
+
+    <!-- Stats PopUp -->
+    <div class="modal fade" id="statsModal" tabindex="-1" aria-labelledby="statsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="statsModalLabel">Settings</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h3>Stats</h3>
+                    Tries: <span id="stats-tries"></span><br />
+                    Wins: <span id="stats-wins"></span><br />
+                    Losses: <span id="stats-losses"></span><br />
+                    Percent: <span id="statsPercent"></span><br />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Default PopUp -->
+    <div class="modal fade" id="defaultModal" tabindex="-1" aria-labelledby="defaultModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="defaultModalLabel">Alert!</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="defaultModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 
     <!-- Bootstrap core JavaScript
@@ -218,64 +257,34 @@
 
         // Use the whole page to handle keystrokes
         document.addEventListener('keyup', function (keyPressedEvent) {
-            console.log(engine.status);
-
             if (engine.status === 'guessing') {
                 engine.analyzeKeyEvent(keyPressedEvent);
             }
-
-            var uhv = engine.userHasWon();
-            var uhl = engine.userHasLost();
-            if (uhv) { alert('You WON!'); }
+            // var uhv = engine.userHasWon();
+            // var uhl = engine.userHasLost();
+            // if (uhv) { alert('You WON!' + JSON.stringify(Stats.getStats())); }
         });
 
+        //
         var letters = document.getElementsByClassName('letter');
         [...letters].forEach(element => {
             element.addEventListener('click', function (eventSource) {
-                console.log(this.innerText);
-
                 if (engine.status === 'guessing') {
                     var fakeKeyEvent = { 'key': this.innerText, 'keyCode': this.innerText.charCodeAt(0) }
                     engine.analyzeKeyEvent(fakeKeyEvent);
                 }
-
-                var uhv = engine.userHasWon();
-                var uhl = engine.userHasLost();
-                if (uhv) { alert('You WON!'); }
+                // var uhv = engine.userHasWon();
+                // var uhl = engine.userHasLost();
+                // if (uhv) { alert('You WON!' + Stats.getStats()); }
             });
         });
 
-        function getARandomWord() {
-            console.log("Get a Random Word....");
-            const xhr = new XMLHttpRequest();
-            xhr.addEventListener("readystatechange", function () {
-                if (this.readyState === this.DONE) {
-                    var tw = JSON.parse(this.responseText)[0].toUpperCase();
-                    console.log('Setting today`s word to ' + tw);
-                    return tw;
-                }
-            });
-            xhr.open("GET", "https://random-word-api.herokuapp.com/word?length=5");
-            xhr.send();
-        }
-
-        async function getARandomWord() {
-            console.log("getARandomWord start");
-
-            const response = await fetch("https://random-word-api.herokuapp.com/word?length=5");
-            const jsonData = await response.json();
-
-            // console.log("getARandomWord return");
-            // let solution = Utilities.isValidDictionaryWord(jsonData[0]);
-            // console.log(solution);
-            return jsonData[0];
-        }
-
         window.onload = function () {
             // Pick a random word, validate it agains the dictionaryAPI and use it as the solution in the current game.
-            var theSolution = getARandomWord()
+            var theSolution = Utilities.getARandomWord()
                 .then((data) => Utilities.isValidDictionaryWord(data)
                     .then(isValid => isValid ? engine.setSolution(data) : location.reload()));
+
         }
     </script>
 
