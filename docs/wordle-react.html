@@ -7,7 +7,10 @@
     <meta name="description" content="">
     <meta name="author" content="Gabor Korodi <gak486@g.harvard.edu>">
 
-    <title>Wordle Clone</title>
+    <title>Wordle Clone - REDUX</title>
+
+    <script src="https://unpkg.com/react@16.7.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.7.0/umd/react-dom.development.js"></script>
 
     <!-- Bootstrap core CSS -->
     <link href="css/styles.css" rel="stylesheet">
@@ -23,6 +26,7 @@
             background-color: #fff;
             color: #444;
 
+            margin-bottom: 10px;
         }
 
         #lettersused {
@@ -75,41 +79,17 @@
     <div class="container">
         <div class="py-5 text-center">
             <img class="d-block mx-auto mb-4" src="W.svg" alt="" width="72" height="72">
-
-            <h2>Wordle Clone by Gabor</h2>
-            <p class="lead">A simple implementation of the word guessing game by <a
-                    href="https://en.wikipedia.org/wiki/Josh_Wardle?useskin=vector" target="_blank">Josh
-                    Wardle</a>.<br />
-                See the original <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank">New York
-                    Times version.</a></p>
+            <h2>Wordle Clone (Redux) by Gabor</h2>
         </div>
 
         <div class="row">
-            <div class="col-1"> </div>
-            <div class="col-10 d-flex justify-content-center">
-                <div id="wrapper" class="wrapper">
-
-                </div>
-
+            <div class="col-12 d-flex justify-content-center" id="myapp">
             </div>
-            <div class="col-1"> </div>
         </div>
-
         <div class="row">
-            <div class="col-4">
-
-            </div>
-            <div class="col-4 justify-content-center">
-                <hr />
-                <div id="lettersused">
-
-                </div>
-            </div>
-            <div class="col-4">
-
+            <div class="col-12 justify-content-center" id="letters">
             </div>
         </div>
-
 
         <footer class="my-5 text-muted text-center text-small">
             <p class="mb-1">&copy; 2023 Gabor Korodi</p>
@@ -238,7 +218,6 @@
     </div>
 
 
-
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
@@ -249,43 +228,85 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script type="text/javascript" src="wordle.js"></script>
+    <script type="text/javascript" src="wordle-react.js"></script>
     <script>
 
-        const board = new WordleBoard(document.getElementById('wrapper'), document.getElementById('lettersused'));
-        const engine = new WordleEngine(board);
+        //const board = new WordleBoard(document.getElementsByClassName('wrapper'), document.getElementById('lettersused'));
+
+        // Create keyboard
+        var w_keys = React.createElement('div', { id: 'lettersused' }, alphabet.map((v, i) => React.createElement(
+            'div',
+            { id: 'letter' + v.toUpperCase(), className: 'letter never-used', key: 'letter-key-' + i },
+            v)));
+
+        // Create the board
+        var w_board = React.createElement('div', { className: 'wrapper' }, arrayRange(1, 6, 1).map(r => arrayRange(1, 5, 1).map(c =>
+            React.createElement(
+                'div',
+                { id: 'row' + r + 'col' + c, className: 'box', key: 'row' + r + 'col' + c },
+                ' ')
+        )));
+
+        ReactDOM.render(w_board, myapp);
+        ReactDOM.render(w_keys, letters);
+
+        const engine = new WordleEngine();
+        engine.setSolution('moody');
+
+        const guesses = ['might', 'flood', 'stray'];
+
+        window.localStorage.setItem('isDebugOn', true);
+        // Force the letters
+        guesses.forEach((w, attempt) => {
+
+            // Set the attemp
+            engine.currentWord = w.toUpperCase();
+            engine.posInWord = 5;
+            engine.setAttempt(attempt + 1);
+            // Fill the row
+            w.split('').forEach((l, j) => {
+                document.getElementById('row' + (attempt + 1) + 'col' + (j + 1)).innerHTML = l.toUpperCase();
+            }
+            );
+
+            // Execute the logic
+            engine.isSolved();
+            engine.nextTry();
+
+            // w.split("").forEach(c => {
+            //     var a = engine.analyzeKeyEvent({ keyCode: c.charCodeAt(), key: c });
+            //     console.log(a);
+            // });
+        });
 
         // Use the whole page to handle keystrokes
-        document.addEventListener('keyup', function (keyPressedEvent) {
-            if (engine.status === 'guessing') {
-                engine.analyzeKeyEvent(keyPressedEvent);
-            }
-            // var uhv = engine.userHasWon();
-            // var uhl = engine.userHasLost();
-            // if (uhv) { alert('You WON!' + JSON.stringify(Stats.getStats())); }
-        });
+        // document.addEventListener('keyup', function (keyPressedEvent) {
+        //     if (engine.status === 'guessing') {
+        //         engine.analyzeKeyEvent(keyPressedEvent);
+        //     }
+        // });
 
-        //
-        var letters = document.getElementsByClassName('letter');
-        [...letters].forEach(element => {
-            element.addEventListener('click', function (eventSource) {
-                if (engine.status === 'guessing') {
-                    var fakeKeyEvent = { 'key': this.innerText, 'keyCode': this.innerText.charCodeAt(0) }
-                    engine.analyzeKeyEvent(fakeKeyEvent);
-                }
-                // var uhv = engine.userHasWon();
-                // var uhl = engine.userHasLost();
-                // if (uhv) { alert('You WON!' + Stats.getStats()); }
-            });
-        });
+        // //
+        // var letters = document.getElementsByClassName('letter');
+        // [...letters].forEach(element => {
+        //     element.addEventListener('click', function (eventSource) {
+        //         if (engine.status === 'guessing') {
+        //             var fakeKeyEvent = { 'key': this.innerText, 'keyCode': this.innerText.charCodeAt(0) }
+        //             engine.analyzeKeyEvent(fakeKeyEvent);
+        //         }
+        //         // var uhv = engine.userHasWon();
+        //         // var uhl = engine.userHasLost();
+        //         // if (uhv) { alert('You WON!' + Stats.getStats()); }
+        //     });
+        // });
 
-        window.onload = function () {
-            // Pick a random word, validate it agains the dictionaryAPI and use it as the solution in the current game.
-            var theSolution = Utilities.getARandomWord()
-                .then((data) => Utilities.isValidDictionaryWord(data)
-                    .then(isValid => isValid ? engine.setSolution(data) : location.reload()));
+        // window.onload = function () {
+        //     // Pick a random word, validate it agains the dictionaryAPI and use it as the solution in the current game.
+        //     var theSolution = Utilities.getARandomWord()
+        //         .then((data) => Utilities.isValidDictionaryWord(data)
+        //             .then(isValid => isValid ? engine.setSolution(data) : location.reload()));
 
-        }
+        // }
     </script>
 
 </body>

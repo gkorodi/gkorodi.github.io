@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script src="https://unpkg.com/react@16.7.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.7.0/umd/react-dom.development.js"></script>
+
+</head>
+
+<body>
+    <div id="myapp"></div>
+
+    <script>
+        //var myLink = React.createElement("a", { "href": "https://finance.yahoo.com", "target": "_blank" }, "Finance");
+
+        function Website(label, url, isExternal = true) {
+            this.label = label;
+            this.url = url;
+            this.isExternal = isExternal;
+        }
+
+        function getLinkElement(websiteObject) {
+            return React.createElement('a', { 'href': websiteObject.url, 'target': websiteObject.isExternal ? '_blank' : '' }, websiteObject.label);
+        }
+
+        var navLinks = [
+            new Website('Finance', 'https://finance.yahoo.com'),
+            new Website('Weather', 'https://weather.com'),
+            new Website('Sport', 'http://sport.finance.com', false)
+        ]
+
+        var oList = React.createElement("ol", null, navLinks.map((e, i) =>
+            React.createElement('li', { 'key': i }, getLinkElement(e))
+        ));
+
+        function MyStaffName({ s }) {
+            return React.createElement('th', null, s.name);
+        }
+
+        function MyStaffTitle({ s }) {
+            return React.createElement('td', null, s.title);
+        }
+
+        function MyStaffMember({ staff }) {
+            return React.createElement('tr', null,
+                [React.createElement(MyStaffName, { s: staff, key: 1 }, null),
+                React.createElement(MyStaffTitle, { s: staff, key: 2 }, null)]);
+        }
+
+        function StaffMember(name, title) {
+            this.name = name;
+            this.title = title;
+        }
+
+        var staffList = [
+            new StaffMember('Bill Bailey', 'Sales Manager'),
+            new StaffMember('Steve Jobs', 'Secretary'),
+            new StaffMember('John Snow', 'CEO'),
+        ]
+
+
+        var memberTable = React.createElement('table', { 'border': '1px' },
+            React.createElement('tbody', null, staffList.map((m, i) =>
+                React.createElement(MyStaffMember, { staff: m, key: i }, null)
+            )
+            ));
+
+        //var staffMember = React.createElement(MyStaffMember, { 'name': 'Bill Bailey', 'title': 'Sales Manager' }, null);
+
+
+        // function getTblDt(label, url) {
+        //     return [
+        //         React.createElement('td', null, label),
+        //         React.createElement('td', null, url)
+        //     ];
+        // }
+
+        // var tbl = React.createElement("table", null, navLinks.map((e, i) =>
+        //     React.createElement('tbody', { 'key': i },
+        //         React.createElement('tr', null, getTblDt(e.label, e.url)))
+        // ));
+
+        ReactDOM.render([oList, memberTable], myapp);	
+    </script>
+</body>
+
+</html>
