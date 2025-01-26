@@ -37,14 +37,14 @@
 </head>
 
 <body>
-    <h2>Tic-Tac-Toe / But with Objects</h2>
+    
     <div class="container">
+        <h2>Tic-Tac-Toe / But with Objects</h2>
         <div id="board"></div>
         <div id="system-message"></div>
     </div>
 
     <script src="tictactoe.js"></script>
-
 
     <script>
 
@@ -52,8 +52,8 @@
         var game = new Game(board);
 
         // Create board
-        [1, 2, 3].forEach(r => {
-            [1, 2, 3].forEach(c => {
+        range(3,1).forEach(r => {
+            range(3,1).forEach(c => {
                 var k = 'row' + r + 'col' + c;
                 var sq = document.getElementById(k);
                 // Check the status of the Game object with every click on a cell
@@ -61,7 +61,6 @@
             });
         });
         board.message('Player `' + game.nextPlayer + '` start');
-
 
     </script>
 </body>

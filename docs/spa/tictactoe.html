@@ -3,7 +3,10 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>TicTacToe - Assignment 2 / Part II</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Simple javascript game of Tic-tac-toe">
+
+    <title>Tic-tac-toe</title>
 
     <style>
         body {
@@ -36,12 +39,11 @@
 </head>
 
 <body>
-    <h2>Tic-Tac-Toe / Assignment 2 (Part 2)</h2>
     <div class="container">
+        <h2>Tic-Tac-Toe</h2>
         <div id="board"></div>
         <div id="system-message"></div>
     </div>
-
 
     <script>
         let rows = [1, 2, 3];
@@ -58,8 +60,6 @@
             });
         });
         b.innerHTML = content;
-
-
         let nextPlayer = Math.floor(Math.random() * 100) >= 50 ? 'X' : 'O';
 
         function cellValue(cellId) {
