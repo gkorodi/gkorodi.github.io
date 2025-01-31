@@ -26,6 +26,7 @@ class Board {
 class Game {
     isGameOver = false;
     nextPlayer = 'X';
+    board = null;
 
     constructor(boardObject) {
         this.board = boardObject;

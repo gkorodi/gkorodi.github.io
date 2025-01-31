@@ -45,10 +45,6 @@ class WordleBoard {
         alphabetsDomElement.innerHTML = content;
     }
 
-    getCellByKey(cellKey) {
-        return document.getElementById(cellKey);
-    }
-
     flipLettter(letterIdx, resolved) {
         document.getElementById('letter' + letterIdx).style.backgroundColor = resolved;
         document.getElementById('letter' + letterIdx).style.color = '#fff';
@@ -58,7 +54,7 @@ class WordleBoard {
         // The first element is the attempt/row integer
         var rowId = resolution.shift();
         [1, 2, 3, 4, 5].forEach(c => {
-            var cell = this.getCellByKey('row' + rowId + 'col' + c);
+            var cell = document.getElementById('row' + rowId + 'col' + c);
             cell.style.backgroundColor = resolution[c - 1];
             this.flipLettter(cell.innerText.toUpperCase(), resolution[c - 1]);
         })
